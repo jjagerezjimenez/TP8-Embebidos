@@ -167,7 +167,7 @@ void SisTick_Init(uint16_t ticks){
 
     SysTick_Config(SystemCoreClock/ticks);   //para actualizar
 
-    NVIC_SetPriority(SysTick_IRQn, (1 << __NVIC_PRIO_BITS) - 1);  //prioridad interrupcion
+    //NVIC_SetPriority(SysTick_IRQn, (1 << __NVIC_PRIO_BITS) - 1);  //prioridad interrupcion
 
     __asm volatile("cpsie i");
 

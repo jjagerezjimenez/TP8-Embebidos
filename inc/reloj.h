@@ -14,7 +14,7 @@ bool ClockGetTime(clock_GJ_t reloj, uint8_t * hora, int size);
 
 bool ClockSetTime(clock_GJ_t reloj, const uint8_t * hora, int size);
 
-void ClockTick(clock_GJ_t reloj);
+int ClockTick(clock_GJ_t reloj);
 
 
 

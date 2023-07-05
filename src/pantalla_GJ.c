@@ -109,6 +109,8 @@ void Display_Parpadeo(display_t display, uint8_t desde, uint8_t hasta, uint16_t 
 }
 
 
-void Display_TogglePuntos(display_t display, uint8_t digit){
+bool Display_TogglePuntos(display_t display, uint8_t digit){
     display -> memory[digit] ^= SEGMENT_P;
+    return (display -> memory[digit] & SEGMENT_P);
+
 }

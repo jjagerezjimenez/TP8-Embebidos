@@ -144,7 +144,7 @@ bool ClockSetTime(clock_GJ_t reloj,const uint8_t * hora, int size){
 	return true;
 }
 
-void ClockTick(clock_GJ_t reloj){
+int ClockTick(clock_GJ_t reloj){
 	
 	reloj -> tics++;
 
@@ -185,6 +185,8 @@ void ClockTick(clock_GJ_t reloj){
     }
 
     Alarma_valida(reloj);
+    
+    return reloj -> tics;
 }
 
 

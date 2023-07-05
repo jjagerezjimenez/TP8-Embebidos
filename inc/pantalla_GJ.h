@@ -39,7 +39,7 @@ void Display_WriteBCD(display_t display, uint8_t * number, uint8_t size);
 
 void Display_Refresh(display_t display);
 
-void Display_TogglePuntos(display_t display, uint8_t digit);
+bool Display_TogglePuntos(display_t display, uint8_t digit);
 
 void Display_Parpadeo(display_t display, uint8_t desde, uint8_t hasta, uint16_t frecuencia);
 

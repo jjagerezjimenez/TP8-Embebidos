@@ -54,32 +54,148 @@
 #define PARPADEO 600
 
 /* === Private data type declarations ========================================================== */
-
+typedef enum{
+    ESTADO_INICIAL,
+    HORA_RUN,
+    MINUTOS_CONFIG,
+    HORA_CONFIG,
+    ALARMA_MIN_CONFIG,
+    ALARMA_HORA_CONFIG
+} maq_esta_t;
 /* === Private variable declarations =========================================================== */
 
 /* === Private function declarations =========================================================== */
 void Alarma_disparo_main(clock_GJ_t reloj);
-/* === Public variable definitions ============================================================= */
+void Maquina_de_estado(maq_esta_t modo);
 
-/* === Private variable definitions ============================================================ */
+void funcion_incrementar(uint8_t valor[2], const uint8_t max[2]);      //consultar
+void funcion_decrementar(uint8_t valor[2], const uint8_t max[2]);
+/* === Public variable definitions ============================================================= */
 static board_t board;
 static clock_GJ_t reloj;
+static maq_esta_t estado;
+/* === Private variable definitions ============================================================ */
+static const uint8_t MINUTOS_MAX[] = {5, 9};
+static const uint8_t HORA_MAX[] = {2, 3};
 /* === Private function implementation ========================================================= */
 void Alarma_disparo_main(clock_GJ_t reloj){
 
 }
+
+void Maquina_de_estado(maq_esta_t modo){
+
+    estado = modo;
+
+    switch (estado)
+    {
+    case ESTADO_INICIAL:
+        
+        Display_Parpadeo(board -> display, 0, 3, PARPADEO);     //para que parpadee todo al prender
+        if(!Display_TogglePuntos(board -> display, 1))
+                Display_TogglePuntos(board -> display, 1);
+
+        break;
+    
+    case HORA_RUN:
+        
+        Display_Parpadeo(board -> display, 0, 3, 0);
+
+        break;
+
+    case MINUTOS_CONFIG:
+        
+        Display_Parpadeo(board -> display, 2, 3, PARPADEO);
+
+        break;
+
+    case HORA_CONFIG:
+        
+        Display_Parpadeo(board -> display, 0, 1, PARPADEO);
+
+        break;
+
+    case ALARMA_MIN_CONFIG:
+        
+        Display_Parpadeo(board -> display, 2, 3, PARPADEO);
+        
+        Display_TogglePuntos(board -> display, 0);
+        Display_TogglePuntos(board -> display, 1);
+        Display_TogglePuntos(board -> display, 2);
+        Display_TogglePuntos(board -> display, 3);
+
+        break;
+
+    case ALARMA_HORA_CONFIG:
+        
+        Display_Parpadeo(board -> display, 0, 1, PARPADEO);
+        
+        Display_TogglePuntos(board -> display, 0);
+        Display_TogglePuntos(board -> display, 1);
+        Display_TogglePuntos(board -> display, 2);
+        Display_TogglePuntos(board -> display, 3);
+
+        break;
+    
+    default:
+        break;
+    }
+
+}
+
+
+void funcion_incrementar(uint8_t valor[2], const uint8_t max[2]){
+
+    valor[1]++;
+    
+    if ((valor[0] >= max[0]) && valor[1] > max[1]) {
+
+        valor[0] = 0;
+        valor[1] = 0;
+    }
+
+    if(valor[1] > 9){
+
+        valor[1] = 0;
+        valor[0]++;
+    }
+        
+}
+
+void funcion_decrementar(uint8_t valor[2], const uint8_t max[2]){       //modificaR, no funciona copmo deberia
+
+    valor[1]--;
+
+    if (valor[1] > 9) {
+        
+        valor[1] = 9;
+        valor[0]--;
+
+    }
+
+    if ((valor[0] >= max[0]) && valor[1] >= max[1]) {                //modificaR, no funciona copmo deberia
+
+        valor[0] = max[0];
+        valor[1] = max[1];
+
+    }
+
+}
+
 /* === Public function implementation ========================================================= */
 
 int main(void) {
 
+    
+
     //int divisor = 0;
     //board_t board = BoardCreate();
-    uint8_t hora[6];
-    reloj = ClockCreate(10, Alarma_disparo_main);
+    uint8_t carga[4];
+    reloj = ClockCreate(TICKS_POR_SEGUNDO, Alarma_disparo_main);
     board = BoardCreate();
 
 
     SisTick_Init(TICKS_POR_SEGUNDO);      //test
+    Maquina_de_estado(ESTADO_INICIAL);
     while (true) {
 
         /*
@@ -131,31 +247,86 @@ int main(void) {
         */
 
        if (DigitalInput_HasActivate(board -> Aceptar)){
-            Display_Parpadeo(board -> display,0,3,PARPADEO);        //parpadea todo
+            //Display_Parpadeo(board -> display,0,3,PARPADEO);        //parpadea todo
+            if (estado == MINUTOS_CONFIG) {
+                Maquina_de_estado(HORA_CONFIG);
+            } else 
+                    if (estado == HORA_CONFIG) {
+
+                    ClockSetTime(reloj, carga, sizeof(carga));
+                    Maquina_de_estado(HORA_RUN);
+            }
        }
+
 
        if (DigitalInput_HasActivate(board -> Cancelar)){
-            Display_Parpadeo(board -> display,0,0,0);
-       }
 
-       
+            if (ClockGetTime(reloj, carga, sizeof(carga))) {
 
-       if (DigitalInput_HasActivate(board -> incrementar)){
-           Display_TogglePuntos(board -> display, 0);
-         }
+                Maquina_de_estado(HORA_RUN);
 
-        if (DigitalInput_HasActivate(board->decrementar)){
+            } else {
+
+                Maquina_de_estado(ESTADO_INICIAL);
+            }
+            }
+
+        if (DigitalInput_HasActivate(board -> Set_time)){
+
+            Maquina_de_estado(MINUTOS_CONFIG);
+            ClockGetTime(reloj, carga, sizeof(carga));
+            Display_WriteBCD(board->display, carga, sizeof(carga));
 
         }
 
-        
+
+        if (DigitalInput_HasActivate(board -> Set_alarm)){
+
+            Maquina_de_estado(ALARMA_MIN_CONFIG);
+            ClockGetTime(reloj, carga, sizeof(carga));
+            Display_WriteBCD(board->display, carga, sizeof(carga));
+
+        }
 
 
-       ClockGetTime(reloj, hora, sizeof(hora));
-       __asm volatile("cpsid i");
+        if (DigitalInput_HasActivate(board -> incrementar)){
 
-       Display_WriteBCD(board -> display,hora, sizeof(hora));       //       Display_WriteBCD(board -> display,(uint8_t[]){hora[0],hora[1],hora[2],hora[3]},4);
-       __asm volatile("cpsie i");
+            if (estado == MINUTOS_CONFIG) {
+                funcion_incrementar(&carga[2], MINUTOS_MAX);
+            } else 
+                    if (estado == HORA_CONFIG) {
+
+                    funcion_incrementar(carga, HORA_MAX);
+            }
+
+                Display_WriteBCD(board -> display, carga, sizeof(carga));
+
+        }
+
+
+        if (DigitalInput_HasActivate(board -> decrementar)){
+
+            if (estado == MINUTOS_CONFIG) {
+                funcion_decrementar(&carga[2], MINUTOS_MAX);
+            } else 
+                    if (estado == HORA_CONFIG) {
+
+                    funcion_decrementar(carga, HORA_MAX);
+            }
+
+                Display_WriteBCD(board -> display, carga, sizeof(carga));
+
+        }
+
+
+
+        for (int i=0; i<20; i++){
+            for(int delay = 0; delay <25000; delay++){
+                __asm("NOP");
+            }
+
+            }
+
 
        
 
@@ -164,9 +335,32 @@ int main(void) {
 }
 
 void SysTick_Handler(void){
+
+    static const int medio_seg = TICKS_POR_SEGUNDO/2;
+    int valor_actual;
+    uint8_t hora[6];
+
     Display_Refresh(board -> display);
-    ClockTick(reloj);
+
+    valor_actual = ClockTick(reloj);
+    
+
+    if (valor_actual == medio_seg || valor_actual == 0) {
+        if (estado <= HORA_RUN) {
+            ClockGetTime(reloj, hora, sizeof(hora));
+            Display_WriteBCD(board->display, hora, sizeof(hora));
+            if (estado == HORA_RUN)
+                Display_TogglePuntos(board->display, 1);
+        }
+    }
 }
+
+
+
+
+
+
+
 
 /* === End of documentation ==================================================================== */
 
