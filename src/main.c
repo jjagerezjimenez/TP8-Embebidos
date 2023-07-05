@@ -46,6 +46,8 @@
 #include "digital_GJ.h"
 #include "pantalla_GJ.h"
 #include <stddef.h>
+#include "reloj.h"
+
 
 /* === Macros definitions ====================================================================== */
 
@@ -55,25 +57,31 @@
 /* === Private variable declarations =========================================================== */
 
 /* === Private function declarations =========================================================== */
-
+void Alarma_disparo_main(clock_GJ_t reloj);
 /* === Public variable definitions ============================================================= */
 
 /* === Private variable definitions ============================================================ */
-
+static board_t board;
+static clock_GJ_t reloj;
 /* === Private function implementation ========================================================= */
+void Alarma_disparo_main(clock_GJ_t reloj){
 
+}
 /* === Public function implementation ========================================================= */
 
 int main(void) {
 
     //int divisor = 0;
-    board_t board = BoardCreate();
+    //board_t board = BoardCreate();
+    uint8_t hora[6];
+    reloj = ClockCreate(10, Alarma_disparo_main);
+    board = BoardCreate();
 
 
-
+    SisTick_init(600);      //test
     while (true) {
 
-
+        /*
         if (DigitalInput_HasActivate(board -> Aceptar)){
             Display_WriteBCD(board -> display, (uint8_t[]){0,1,2,3},4);
         }
@@ -110,8 +118,7 @@ int main(void) {
         //    //Chip_GPIO_SetPinToggle(LPC_GPIO_PORT, LED_3_GPIO, LED_3_BIT);
         //    DigitalOutput_Toggle(board->Buzzer);
         //}
-
-
+        
 
         Display_Refresh(board -> display);
 
@@ -120,10 +127,22 @@ int main(void) {
                 __asm("NOP");
             }
         }
+        */
 
+       ClockGetTime(reloj, hora, sizeof(hora));
+       __asm volatile("cpsid i");
+
+       Display_WriteBCD(board -> display,(uint8_t[]){hora[3],hora[2],hora[1],hora[0]},4);
+       __asm volatile("cpsie i");
 
 
     }
+    
+}
+
+void Systick_handler(void){
+    Display_Refresh(board -> display);
+    ClockTick(reloj);
 }
 
 /* === End of documentation ==================================================================== */

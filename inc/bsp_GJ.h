@@ -24,9 +24,11 @@ typedef struct board_s {
 
     display_t        display;
 
-} const * const board_t;
+} const * board_t;
 
 
 board_t BoardCreate(void);
+
+void SisTick_init(uint16_t tics);
 
 #endif

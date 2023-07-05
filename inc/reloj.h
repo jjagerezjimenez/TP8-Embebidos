@@ -7,6 +7,7 @@ typedef void (*evento_alarma_t)(clock_GJ_t reloj);
 
 
 
+
 clock_GJ_t ClockCreate(int tics_por_segundo, evento_alarma_t evento_alar);
 
 bool ClockGetTime(clock_GJ_t reloj, uint8_t * hora, int size);
