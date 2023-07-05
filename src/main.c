@@ -77,6 +77,9 @@ void funcion_decrementar(uint8_t valor[2], const uint8_t max[2]);
 
 void Dot_On(int posicion);
 void Dot_Off(int posicion);
+
+void Alarma_On(clock_GJ_t reloj);
+void Alarma_Off(clock_GJ_t reloj);
 /* === Public variable definitions ============================================================= */
 static board_t board;
 static clock_GJ_t reloj;
@@ -100,7 +103,11 @@ void Maquina_de_estado(maq_esta_t modo){
         Display_Parpadeo(board -> display, 0, 3, PARPADEO);     //para que parpadee todo al prender
         //if(!Display_TogglePuntos(board -> display, 1))
          //       Display_TogglePuntos(board -> display, 1);
+        
+        Dot_Off(0);
         Dot_On(1);
+        Dot_Off(2);
+        Dot_Off(3);
         break;
     
     case HORA_RUN:
@@ -108,7 +115,7 @@ void Maquina_de_estado(maq_esta_t modo){
         Display_Parpadeo(board -> display, 0, 3, 0);
 
         Dot_Off(0);
-        Dot_Off(1);
+        Dot_On(1);
         Dot_Off(2);
         Dot_Off(3);
 
@@ -118,7 +125,10 @@ void Maquina_de_estado(maq_esta_t modo){
         
         Display_Parpadeo(board -> display, 2, 3, PARPADEO);
 
+        Dot_Off(0);
         Dot_On(1);
+        Dot_Off(2);
+        Dot_Off(3);
 
         break;
 
@@ -126,7 +136,10 @@ void Maquina_de_estado(maq_esta_t modo){
         
         Display_Parpadeo(board -> display, 0, 1, PARPADEO);
 
+        Dot_Off(0);
         Dot_On(1);
+        Dot_Off(2);
+        Dot_Off(3);
 
         break;
 
@@ -223,6 +236,22 @@ void Dot_Off(int posicion){
 
 }
 
+void Alarma_On(clock_GJ_t reloj){
+    if (!ClockAlarmaToggle(reloj)){
+
+        ClockAlarmaToggle(reloj);
+    }
+        Dot_On(3);
+}
+ 
+void Alarma_Off(clock_GJ_t reloj){
+    if (!ClockAlarmaToggle(reloj)){
+
+        ClockAlarmaToggle(reloj);
+    }
+        Dot_Off(3);
+}
+
 
 
 
@@ -293,23 +322,29 @@ int main(void) {
 
        if (DigitalInput_HasActivate(board -> Aceptar)){
             //Display_Parpadeo(board -> display,0,3,PARPADEO);        //parpadea todo
-            if (estado == MINUTOS_CONFIG) {
-                Maquina_de_estado(HORA_CONFIG);
-            } else 
-                    if (estado == HORA_CONFIG) {
+            if (estado == HORA_RUN) {
+                Alarma_On(reloj);
+            } else
+                    if(estado == MINUTOS_CONFIG){
 
-                    ClockSetTime(reloj, carga, sizeof(carga));
-                    Maquina_de_estado(HORA_RUN);
-            }
+                        Maquina_de_estado(HORA_CONFIG);
+                    } else 
+                            if (estado == HORA_CONFIG) {
 
-            if (estado == ALARMA_MIN_CONFIG) {
-                Maquina_de_estado(ALARMA_HORA_CONFIG);
-            } else 
-                    if (estado == ALARMA_HORA_CONFIG) {
+                            ClockSetTime(reloj, carga, sizeof(carga));
+                            Maquina_de_estado(HORA_RUN);
+            } else
 
-                    ClockSetTime(reloj, carga, sizeof(carga));
-                    Maquina_de_estado(HORA_RUN);
-            }
+                if (estado == ALARMA_MIN_CONFIG) {
+                    Maquina_de_estado(ALARMA_HORA_CONFIG);
+                } else 
+                        if (estado == ALARMA_HORA_CONFIG) {
+
+                        ClockSetAlarma(reloj, carga, sizeof(carga));
+                        Alarma_On(reloj);
+
+                        Maquina_de_estado(HORA_RUN);
+                }
 
 
        }
@@ -317,11 +352,16 @@ int main(void) {
 
        if (DigitalInput_HasActivate(board -> Cancelar)){
 
-            if (ClockGetTime(reloj, carga, sizeof(carga))) {
+            if (ClockGetTime(reloj, carga, sizeof(carga)) && (estado != HORA_RUN)) {
 
                 Maquina_de_estado(HORA_RUN);
 
-            } else {
+            } else 
+                    if (estado == HORA_RUN){
+                        Alarma_Off(reloj);
+                    }
+
+             else {
 
                 Maquina_de_estado(ESTADO_INICIAL);
             }
@@ -349,19 +389,27 @@ int main(void) {
 
             if (estado == MINUTOS_CONFIG) {
                 funcion_incrementar(&carga[2], MINUTOS_MAX);
+
+                Display_WriteBCD(board -> display, carga, sizeof(carga));
             } else 
                     if (estado == HORA_CONFIG) {
 
                     funcion_incrementar(carga, HORA_MAX);
+
+                    Display_WriteBCD(board -> display, carga, sizeof(carga));
             } else  //agrego modificador de alarma
                     if (estado == ALARMA_MIN_CONFIG){
                         funcion_incrementar(&carga[2], MINUTOS_MAX);
+
+                        Display_WriteBCD(board -> display, carga, sizeof(carga));
                     } else  
                             if (estado == ALARMA_HORA_CONFIG){
                                 funcion_incrementar(carga, HORA_MAX);
+
+                                Display_WriteBCD(board -> display, carga, sizeof(carga));
                             }
 
-                Display_WriteBCD(board -> display, carga, sizeof(carga));
+                //Display_WriteBCD(board -> display, carga, sizeof(carga));
 
         }
 
@@ -370,19 +418,27 @@ int main(void) {
 
             if (estado == MINUTOS_CONFIG) {
                 funcion_decrementar(&carga[2], MINUTOS_MAX);
+
+                Display_WriteBCD(board -> display, carga, sizeof(carga));
             } else 
                     if (estado == HORA_CONFIG) {
 
                     funcion_decrementar(carga, HORA_MAX);
+
+                    Display_WriteBCD(board -> display, carga, sizeof(carga));
             } else  //agrego modificador de alarma
                     if (estado == ALARMA_MIN_CONFIG){
                         funcion_decrementar(&carga[2], MINUTOS_MAX);
+
+                        Display_WriteBCD(board -> display, carga, sizeof(carga));
                     } else  
                             if (estado == ALARMA_HORA_CONFIG){
                                 funcion_decrementar(carga, HORA_MAX);
+
+                                Display_WriteBCD(board -> display, carga, sizeof(carga));
                             }
 
-                Display_WriteBCD(board -> display, carga, sizeof(carga));
+                //Display_WriteBCD(board -> display, carga, sizeof(carga));
 
         }
 
