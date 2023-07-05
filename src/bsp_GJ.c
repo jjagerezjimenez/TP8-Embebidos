@@ -160,12 +160,12 @@ board_t BoardCreate(void){
     return &board;
 }
 
-void SisTick_init(uint16_t tics){
+void SisTick_Init(uint16_t ticks){
     __asm volatile("cpsid i");
 
     SystemCoreClockUpdate();        
 
-    SysTick_Config(SystemCoreClock/tics);   //para actualizar
+    SysTick_Config(SystemCoreClock/ticks);   //para actualizar
 
     NVIC_SetPriority(SysTick_IRQn, (1 << __NVIC_PRIO_BITS) - 1);  //prioridad interrupcion
 

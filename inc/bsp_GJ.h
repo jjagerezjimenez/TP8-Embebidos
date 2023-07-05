@@ -29,6 +29,6 @@ typedef struct board_s {
 
 board_t BoardCreate(void);
 
-void SisTick_init(uint16_t tics);
+void SisTick_Init(uint16_t ticks);
 
 #endif

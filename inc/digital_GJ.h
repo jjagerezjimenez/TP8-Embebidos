@@ -6,7 +6,7 @@
 #include <stdbool.h>
 
 #ifndef INSTANCIAS_GPIO
-#define INSTANCIAS_GPIO 16
+#define INSTANCIAS_GPIO 6
 #endif
 
 

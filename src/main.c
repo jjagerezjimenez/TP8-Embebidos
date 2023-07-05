@@ -78,7 +78,7 @@ int main(void) {
     board = BoardCreate();
 
 
-    SisTick_init(600);      //test
+    SisTick_Init(6000);      //test
     while (true) {
 
         /*
@@ -132,7 +132,7 @@ int main(void) {
        ClockGetTime(reloj, hora, sizeof(hora));
        __asm volatile("cpsid i");
 
-       Display_WriteBCD(board -> display,(uint8_t[]){hora[3],hora[2],hora[1],hora[0]},4);
+       Display_WriteBCD(board -> display,(uint8_t[]){hora[0],hora[1],hora[2],hora[3]},4);
        __asm volatile("cpsie i");
 
 
@@ -140,7 +140,7 @@ int main(void) {
     
 }
 
-void Systick_handler(void){
+void SysTick_Handler(void){
     Display_Refresh(board -> display);
     ClockTick(reloj);
 }
