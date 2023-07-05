@@ -89,6 +89,7 @@ static const uint8_t MINUTOS_MAX[] = {5, 9};
 static const uint8_t HORA_MAX[] = {2, 3};
 /* === Private function implementation ========================================================= */
 void Alarma_disparo_main(clock_GJ_t reloj){
+    DigitalOutput_Activate(board -> Buzzer);
 
 }
 
