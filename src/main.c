@@ -50,9 +50,13 @@
 
 
 /* === Macros definitions ====================================================================== */
+#ifndef TICKS_POR_SEGUNDO
 #define TICKS_POR_SEGUNDO 600
-#define PARPADEO 600
+#endif
 
+#ifndef PARPADEO
+#define PARPADEO 600
+#endif
 /* === Private data type declarations ========================================================== */
 typedef enum{
     ESTADO_INICIAL,
@@ -297,6 +301,17 @@ int main(void) {
                     ClockSetTime(reloj, carga, sizeof(carga));
                     Maquina_de_estado(HORA_RUN);
             }
+
+            if (estado == ALARMA_MIN_CONFIG) {
+                Maquina_de_estado(ALARMA_HORA_CONFIG);
+            } else 
+                    if (estado == ALARMA_HORA_CONFIG) {
+
+                    ClockSetTime(reloj, carga, sizeof(carga));
+                    Maquina_de_estado(HORA_RUN);
+            }
+
+
        }
 
 
@@ -338,7 +353,13 @@ int main(void) {
                     if (estado == HORA_CONFIG) {
 
                     funcion_incrementar(carga, HORA_MAX);
-            }
+            } else  //agrego modificador de alarma
+                    if (estado == ALARMA_MIN_CONFIG){
+                        funcion_incrementar(&carga[2], MINUTOS_MAX);
+                    } else  
+                            if (estado == ALARMA_HORA_CONFIG){
+                                funcion_incrementar(carga, HORA_MAX);
+                            }
 
                 Display_WriteBCD(board -> display, carga, sizeof(carga));
 
@@ -353,7 +374,13 @@ int main(void) {
                     if (estado == HORA_CONFIG) {
 
                     funcion_decrementar(carga, HORA_MAX);
-            }
+            } else  //agrego modificador de alarma
+                    if (estado == ALARMA_MIN_CONFIG){
+                        funcion_decrementar(&carga[2], MINUTOS_MAX);
+                    } else  
+                            if (estado == ALARMA_HORA_CONFIG){
+                                funcion_decrementar(carga, HORA_MAX);
+                            }
 
                 Display_WriteBCD(board -> display, carga, sizeof(carga));
 
