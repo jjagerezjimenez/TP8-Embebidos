@@ -57,6 +57,10 @@
 #ifndef PARPADEO
 #define PARPADEO 600
 #endif
+
+#ifndef ALARM_POSP
+#define ALARM_POSP 5
+#endif
 /* === Private data type declarations ========================================================== */
 typedef enum{
     ESTADO_INICIAL,
@@ -84,12 +88,15 @@ void Alarma_Off(clock_GJ_t reloj);
 static board_t board;
 static clock_GJ_t reloj;
 static maq_esta_t estado;
+static bool posp_alarm;
 /* === Private variable definitions ============================================================ */
 static const uint8_t MINUTOS_MAX[] = {5, 9};
 static const uint8_t HORA_MAX[] = {2, 3};
 /* === Private function implementation ========================================================= */
 void Alarma_disparo_main(clock_GJ_t reloj){
+
     DigitalOutput_Activate(board -> Buzzer);
+    posp_alarm = true;
 
 }
 
@@ -323,7 +330,10 @@ int main(void) {
 
        if (DigitalInput_HasActivate(board -> Aceptar)){
             //Display_Parpadeo(board -> display,0,3,PARPADEO);        //parpadea todo
-            if (estado == HORA_RUN) {
+
+            if(!posp_alarm){
+
+                if (estado == HORA_RUN) {
                 Alarma_On(reloj);
             } else
                     if(estado == MINUTOS_CONFIG){
@@ -342,10 +352,19 @@ int main(void) {
                         if (estado == ALARMA_HORA_CONFIG) {
 
                         ClockSetAlarma(reloj, carga, sizeof(carga));
+                        Maquina_de_estado(HORA_RUN);
                         Alarma_On(reloj);
 
-                        Maquina_de_estado(HORA_RUN);
+                        
+                } else {
+
+                    DigitalOutput_Desactivate(board -> Buzzer);
+                    ClockAlarmaRetardo(reloj, ALARM_POSP);
+
+                    posp_alarm = false;
                 }
+
+            }
 
 
        }
@@ -353,20 +372,37 @@ int main(void) {
 
        if (DigitalInput_HasActivate(board -> Cancelar)){
 
-            if (ClockGetTime(reloj, carga, sizeof(carga)) && (estado != HORA_RUN)) {
+            if(!posp_alarm){ 
 
-                Maquina_de_estado(HORA_RUN);
+                if(estado == HORA_RUN){
+                    Alarma_Off(reloj);
+                }else
 
-            } else 
-                    if (estado == HORA_RUN){
-                        Alarma_Off(reloj);
-                    }
+                        if (ClockGetTime(reloj, carga, sizeof(carga)) && (estado != HORA_RUN)) {
 
-             else {
+                            Maquina_de_estado(HORA_RUN);
 
-                Maquina_de_estado(ESTADO_INICIAL);
+                        } else 
+                                if (estado == HORA_RUN){
+                                    Alarma_Off(reloj);
+                                }
+
+                        else {
+
+                            Maquina_de_estado(ESTADO_INICIAL);
+                        }
+
+                } else {
+                            DigitalOutput_Desactivate (board -> Buzzer);
+                            posp_alarm = false;
+
+                        }
+
             }
-            }
+            
+
+
+
 
         if (DigitalInput_HasActivate(board -> Set_time)){
 
