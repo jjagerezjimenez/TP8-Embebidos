@@ -50,7 +50,8 @@
 
 
 /* === Macros definitions ====================================================================== */
-
+#define TICKS_POR_SEGUNDO 600
+#define PARPADEO 600
 
 /* === Private data type declarations ========================================================== */
 
@@ -78,7 +79,7 @@ int main(void) {
     board = BoardCreate();
 
 
-    SisTick_Init(6000);      //test
+    SisTick_Init(TICKS_POR_SEGUNDO);      //test
     while (true) {
 
         /*
@@ -129,12 +130,34 @@ int main(void) {
         }
         */
 
+       if (DigitalInput_HasActivate(board -> Aceptar)){
+            Display_Parpadeo(board -> display,0,3,PARPADEO);        //parpadea todo
+       }
+
+       if (DigitalInput_HasActivate(board -> Cancelar)){
+            Display_Parpadeo(board -> display,0,0,0);
+       }
+
+       
+
+       if (DigitalInput_HasActivate(board -> incrementar)){
+           Display_TogglePuntos(board -> display, 0);
+         }
+
+        if (DigitalInput_HasActivate(board->decrementar)){
+
+        }
+
+        
+
+
        ClockGetTime(reloj, hora, sizeof(hora));
        __asm volatile("cpsid i");
 
-       Display_WriteBCD(board -> display,(uint8_t[]){hora[0],hora[1],hora[2],hora[3]},4);
+       Display_WriteBCD(board -> display,hora, sizeof(hora));       //       Display_WriteBCD(board -> display,(uint8_t[]){hora[0],hora[1],hora[2],hora[3]},4);
        __asm volatile("cpsie i");
 
+       
 
     }
     
