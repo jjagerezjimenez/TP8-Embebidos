@@ -24,7 +24,7 @@ struct alarma_s{
 
 };
 
-struct clock_s {
+struct clock_GJ_s {
     uint8_t hora_actual[6];
 	uint32_t tics_per_second;
     uint32_t tics;
@@ -46,13 +46,13 @@ struct clock_s {
 
 
 
-void Alarma_valida(clock_t reloj);
+void Alarma_valida(clock_GJ_t reloj);
 
-bool Compara_Alarma_Hora(clock_t reloj);
+bool Compara_Alarma_Hora(clock_GJ_t reloj);
 
-void Alarma_disparo(clock_t);
+void Alarma_disparo(clock_GJ_t);
 
-void Temporizador(clock_t reloj);
+void Temporizador(clock_GJ_t reloj);
 
 
 /*
@@ -80,7 +80,7 @@ void verificar_alarma(clock_t reloj){
 */
 
 
-void Alarma_valida(clock_t reloj){
+void Alarma_valida(clock_GJ_t reloj){
     static uint32_t i;
 
     if (reloj -> alarma -> alarma_valida & Compara_Alarma_Hora(reloj)) {        //&&?
@@ -95,18 +95,18 @@ void Alarma_valida(clock_t reloj){
 }
 
 
-bool Compara_Alarma_Hora(clock_t reloj){
+bool Compara_Alarma_Hora(clock_GJ_t reloj){
     if (memcmp(reloj -> alarma -> alarma_actual, reloj -> hora_actual, sizeof(reloj -> hora_actual))== 0){
         return true;
     }   return false;
 }
 
-void Alarma_disparo(clock_t reloj){
+void Alarma_disparo(clock_GJ_t reloj){
     reloj -> alarma -> evento_alarm(reloj);
 }
         
 
-void Temporizador(clock_t reloj){
+void Temporizador(clock_GJ_t reloj){
     if (reloj -> alarma -> tempo){
         reloj -> alarma -> tempo--;
 
@@ -118,8 +118,8 @@ void Temporizador(clock_t reloj){
 
 
 
-clock_t ClockCreate(int tics_por_segundo, evento_alarma_t evento_alar){
-	static struct clock_s self[1];
+clock_GJ_t ClockCreate(int tics_por_segundo, evento_alarma_t evento_alar){
+	static struct clock_GJ_s self[1];
 	memset(self, 0, sizeof(self));
 
     self -> tics_per_second = tics_por_segundo;
@@ -130,13 +130,13 @@ clock_t ClockCreate(int tics_por_segundo, evento_alarma_t evento_alar){
     //return NULL;
 }
 
-bool ClockGetTime(clock_t reloj, uint8_t * hora, int size){
+bool ClockGetTime(clock_GJ_t reloj, uint8_t * hora, int size){
 	memcpy(hora, reloj->hora_actual, size);
 	return reloj->valida;
     //return true;
 }
 
-bool ClockSetTime(clock_t reloj,const uint8_t * hora, int size){
+bool ClockSetTime(clock_GJ_t reloj,const uint8_t * hora, int size){
 
 	memcpy(reloj->hora_actual, hora, size);
 	reloj->valida = true;
@@ -144,7 +144,7 @@ bool ClockSetTime(clock_t reloj,const uint8_t * hora, int size){
 	return true;
 }
 
-void ClockTick(clock_t reloj){
+void ClockTick(clock_GJ_t reloj){
 	
 	reloj -> tics++;
 
@@ -189,24 +189,24 @@ void ClockTick(clock_t reloj){
 
 
 
-bool ClockGetAlarma(clock_t reloj, uint8_t * hora, int size){
+bool ClockGetAlarma(clock_GJ_t reloj, uint8_t * hora, int size){
 	memcpy(hora, reloj -> alarma -> alarma_actual, size);
 	return reloj -> alarma -> alarma_valida;
 }
 
-bool ClockSetAlarma(clock_t reloj, const uint8_t * hora, int size){
+bool ClockSetAlarma(clock_GJ_t reloj, const uint8_t * hora, int size){
 	memcpy(reloj -> alarma -> alarma_actual, hora, size);
 	reloj -> alarma -> alarma_valida = true;
 
 	return reloj -> alarma -> alarma_valida; 
 }
 
-bool ClockAlarmaRetardo(clock_t reloj, int retardo){
+bool ClockAlarmaRetardo(clock_GJ_t reloj, int retardo){
 	//return (reloj -> alarma -> alarma_valida);
     return (reloj -> alarma -> tempo = (60 * retardo));
 }
 
-bool ClockAlarmaToggle(clock_t reloj){
+bool ClockAlarmaToggle(clock_GJ_t reloj){
 	//reloj -> alarma -> alarma_valida ^= true;		// consultar
     if (reloj -> alarma -> alarma_valida){
         reloj -> alarma -> alarma_valida = false;
