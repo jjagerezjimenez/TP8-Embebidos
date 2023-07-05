@@ -70,6 +70,9 @@ void Maquina_de_estado(maq_esta_t modo);
 
 void funcion_incrementar(uint8_t valor[2], const uint8_t max[2]);      //consultar
 void funcion_decrementar(uint8_t valor[2], const uint8_t max[2]);
+
+void Dot_On(int posicion);
+void Dot_Off(int posicion);
 /* === Public variable definitions ============================================================= */
 static board_t board;
 static clock_GJ_t reloj;
@@ -91,14 +94,19 @@ void Maquina_de_estado(maq_esta_t modo){
     case ESTADO_INICIAL:
         
         Display_Parpadeo(board -> display, 0, 3, PARPADEO);     //para que parpadee todo al prender
-        if(!Display_TogglePuntos(board -> display, 1))
-                Display_TogglePuntos(board -> display, 1);
-
+        //if(!Display_TogglePuntos(board -> display, 1))
+         //       Display_TogglePuntos(board -> display, 1);
+        Dot_On(1);
         break;
     
     case HORA_RUN:
         
         Display_Parpadeo(board -> display, 0, 3, 0);
+
+        Dot_Off(0);
+        Dot_Off(1);
+        Dot_Off(2);
+        Dot_Off(3);
 
         break;
 
@@ -106,33 +114,47 @@ void Maquina_de_estado(maq_esta_t modo){
         
         Display_Parpadeo(board -> display, 2, 3, PARPADEO);
 
+        Dot_On(1);
+
         break;
 
     case HORA_CONFIG:
         
         Display_Parpadeo(board -> display, 0, 1, PARPADEO);
 
+        Dot_On(1);
+
         break;
 
     case ALARMA_MIN_CONFIG:
         
         Display_Parpadeo(board -> display, 2, 3, PARPADEO);
-        
+        /*
         Display_TogglePuntos(board -> display, 0);
         Display_TogglePuntos(board -> display, 1);
         Display_TogglePuntos(board -> display, 2);
         Display_TogglePuntos(board -> display, 3);
+        */
+       Dot_On(0);
+       Dot_On(1);
+       Dot_On(2);
+       Dot_On(3);
 
         break;
 
     case ALARMA_HORA_CONFIG:
         
         Display_Parpadeo(board -> display, 0, 1, PARPADEO);
-        
+        /*
         Display_TogglePuntos(board -> display, 0);
         Display_TogglePuntos(board -> display, 1);
         Display_TogglePuntos(board -> display, 2);
         Display_TogglePuntos(board -> display, 3);
+        */
+        Dot_On(0);
+        Dot_On(1);
+        Dot_On(2);
+        Dot_On(3);
 
         break;
     
@@ -180,6 +202,25 @@ void funcion_decrementar(uint8_t valor[2], const uint8_t max[2]){       //modifi
     }
 
 }
+
+void Dot_On(int posicion){
+
+    if (!Display_TogglePuntos(board -> display, posicion)){
+        Display_TogglePuntos(board -> display, posicion);
+    }
+
+}
+
+void Dot_Off(int posicion){
+    
+    if (Display_TogglePuntos(board -> display, posicion)){
+        Display_TogglePuntos(board -> display, posicion);
+    }
+
+}
+
+
+
 
 /* === Public function implementation ========================================================= */
 
