@@ -47,6 +47,9 @@
 #include "pantalla_GJ.h"
 #include <stddef.h>
 #include "reloj.h"
+#include "FreeRTOS.h"
+#include "semphr.h"
+#include "task.h"
 
 
 /* === Macros definitions ====================================================================== */
