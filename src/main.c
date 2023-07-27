@@ -92,7 +92,7 @@ typedef enum{
 
 /* === Private function declarations =========================================================== */
 void Alarma_disparo_main(clock_GJ_t reloj);
-void Maquina_de_estado(maq_esta_t estado);
+void Maquina_de_estado(maq_esta_t modo);
 
 void funcion_incrementar(uint8_t valor[2], const uint8_t max[2]);      //consultar
 void funcion_decrementar(uint8_t valor[2], const uint8_t max[2]);
@@ -136,9 +136,9 @@ void Alarma_disparo_main(clock_GJ_t reloj){
 
 }
 
-void Maquina_de_estado(maq_esta_t estado){
+void Maquina_de_estado(maq_esta_t modo){
 
-    estado = estado;
+    estado = modo;
 
     switch (estado)
     {
